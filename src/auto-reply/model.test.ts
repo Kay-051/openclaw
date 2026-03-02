@@ -50,6 +50,13 @@ describe("extractModelDirective", () => {
       expect(result.rawProfile).toBe("work");
     });
 
+    it("handles OAuth profile IDs containing @ (email-based)", () => {
+      const result = extractModelDirective("/model flash@google-gemini-cli:test@gmail.com");
+      expect(result.hasDirective).toBe(true);
+      expect(result.rawModel).toBe("flash");
+      expect(result.rawProfile).toBe("google-gemini-cli:test@gmail.com");
+    });
+
     it("returns no directive for plain text", () => {
       const result = extractModelDirective("hello world");
       expect(result.hasDirective).toBe(false);

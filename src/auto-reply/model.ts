@@ -34,7 +34,15 @@ export function extractModelDirective(
   let rawModel = raw;
   let rawProfile: string | undefined;
   if (raw) {
-    const atIndex = raw.lastIndexOf("@");
+    // Find the first '@' that is not part of an OpenRouter preset path
+    // (preset paths use '/@' like 'openrouter/@preset/...').
+    let atIndex = -1;
+    for (let i = 1; i < raw.length; i++) {
+      if (raw[i] === "@" && raw[i - 1] !== "/") {
+        atIndex = i;
+        break;
+      }
+    }
     if (atIndex > 0) {
       const candidateModel = raw.slice(0, atIndex).trim();
       const candidateProfile = raw.slice(atIndex + 1).trim();
