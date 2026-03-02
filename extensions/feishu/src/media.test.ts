@@ -418,6 +418,25 @@ describe("sanitizeFileNameForUpload", () => {
     expect(result).toMatch(/\.xlsx$/);
     expect(result).not.toContain("报告");
   });
+
+  it("encodes non-ASCII extensions", () => {
+    const result = sanitizeFileNameForUpload("报告.文档");
+    expect(result).toContain("%E6%96%87%E6%A1%A3");
+    expect(result).not.toContain("文档");
+  });
+
+  it("encodes emoji filenames", () => {
+    const result = sanitizeFileNameForUpload("report_😀.txt");
+    expect(result).toContain("%F0%9F%98%80");
+    expect(result).toMatch(/\.txt$/);
+  });
+
+  it("encodes mixed ASCII and non-ASCII extensions", () => {
+    const result = sanitizeFileNameForUpload("notes_总结.v测试");
+    expect(result).toContain("notes_");
+    expect(result).toContain("%E6%B5%8B%E8%AF%95");
+    expect(result).not.toContain("测试");
+  });
 });
 
 describe("downloadMessageResourceFeishu", () => {

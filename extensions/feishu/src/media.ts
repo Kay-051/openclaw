@@ -219,13 +219,10 @@ export function sanitizeFileNameForUpload(fileName: string): string {
   if (ASCII_ONLY.test(fileName)) {
     return fileName;
   }
-  const ext = path.extname(fileName);
-  const base = fileName.slice(0, fileName.length - ext.length);
-  const encoded = encodeURIComponent(base)
+  return encodeURIComponent(fileName)
     .replace(/'/g, "%27")
     .replace(/\(/g, "%28")
     .replace(/\)/g, "%29");
-  return encoded + ext;
 }
 
 /**
