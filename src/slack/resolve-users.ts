@@ -160,8 +160,11 @@ async function lookupSlackUserById(
   try {
     const res = (await client.users.info({ user: userId })) as SlackUserInfoResponse;
     const member = res.user;
-    const id = member?.id?.trim();
-    const name = member?.name?.trim();
+    if (!member) {
+      return null;
+    }
+    const id = member.id?.trim();
+    const name = member.name?.trim();
     if (!id || !name) {
       return null;
     }
