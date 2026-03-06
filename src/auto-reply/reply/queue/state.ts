@@ -29,7 +29,8 @@ export function getExistingFollowupQueue(key: string): FollowupQueueState | unde
 }
 
 export function getFollowupQueue(key: string, settings: QueueSettings): FollowupQueueState {
-  const existing = FOLLOWUP_QUEUES.get(key);
+  const cleaned = key.trim();
+  const existing = FOLLOWUP_QUEUES.get(cleaned);
   if (existing) {
     applyQueueRuntimeSettings({
       target: existing,
@@ -59,7 +60,7 @@ export function getFollowupQueue(key: string, settings: QueueSettings): Followup
     target: created,
     settings,
   });
-  FOLLOWUP_QUEUES.set(key, created);
+  FOLLOWUP_QUEUES.set(cleaned, created);
   return created;
 }
 
