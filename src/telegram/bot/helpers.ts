@@ -280,10 +280,22 @@ export function buildGroupLabel(msg: Message, chatId: number | string, messageTh
   return `group:${chatId}${topicSuffix}`;
 }
 
+const TELEGRAM_USERNAME_CHAR = /[a-z0-9_]/;
+
 export function hasBotMention(msg: Message, botUsername: string) {
   const text = (msg.text ?? msg.caption ?? "").toLowerCase();
-  if (text.includes(`@${botUsername}`)) {
-    return true;
+  const mention = `@${botUsername}`;
+  let searchFrom = 0;
+  while (true) {
+    const idx = text.indexOf(mention, searchFrom);
+    if (idx === -1) {
+      break;
+    }
+    const afterIdx = idx + mention.length;
+    if (afterIdx >= text.length || !TELEGRAM_USERNAME_CHAR.test(text[afterIdx])) {
+      return true;
+    }
+    searchFrom = afterIdx;
   }
   const entities = msg.entities ?? msg.caption_entities ?? [];
   for (const ent of entities) {

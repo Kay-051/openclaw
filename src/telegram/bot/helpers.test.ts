@@ -4,6 +4,7 @@ import {
   buildTypingThreadParams,
   describeReplyTarget,
   expandTextLinks,
+  hasBotMention,
   normalizeForwardedContext,
   resolveTelegramDirectPeerId,
   resolveTelegramForumThreadId,
@@ -343,6 +344,62 @@ describe("describeReplyTarget", () => {
     expect(result?.forwardedFrom?.fromType).toBe("user");
     expect(result?.forwardedFrom?.fromId).toBe("123");
     expect(result?.forwardedFrom?.date).toBe(700);
+  });
+});
+
+describe("hasBotMention", () => {
+  const msg = (text: string, entities?: Array<{ type: string; offset: number; length: number }>) =>
+    ({
+      text,
+      entities: entities ?? [],
+      // oxlint-disable-next-line typescript/no-explicit-any
+    }) as any;
+
+  it("detects exact @mention in text", () => {
+    expect(hasBotMention(msg("hello @mybot"), "mybot")).toBe(true);
+  });
+
+  it("detects @mention at end of text", () => {
+    expect(hasBotMention(msg("ping @mybot"), "mybot")).toBe(true);
+  });
+
+  it("does not false-positive on prefix substring", () => {
+    expect(hasBotMention(msg("hello @mybothelper"), "mybot")).toBe(false);
+  });
+
+  it("does not false-positive on suffix with underscore", () => {
+    expect(hasBotMention(msg("hello @mybot_v2"), "mybot")).toBe(false);
+  });
+
+  it("does not false-positive on suffix with digit", () => {
+    expect(hasBotMention(msg("hello @mybot2"), "mybot")).toBe(false);
+  });
+
+  it("detects mention followed by punctuation", () => {
+    expect(hasBotMention(msg("hi @mybot!"), "mybot")).toBe(true);
+  });
+
+  it("detects mention followed by space", () => {
+    expect(hasBotMention(msg("@mybot how are you"), "mybot")).toBe(true);
+  });
+
+  it("does not match when entity refers to a different user", () => {
+    expect(
+      hasBotMention(
+        msg("hello @mybothelper", [{ type: "mention", offset: 6, length: 13 }]),
+        "mybot",
+      ),
+    ).toBe(false);
+  });
+
+  it("returns false when no mention at all", () => {
+    expect(hasBotMention(msg("just a message"), "mybot")).toBe(false);
+  });
+
+  it("handles caption-based messages", () => {
+    // oxlint-disable-next-line typescript/no-explicit-any
+    const captionMsg = { caption: "photo @mybot", caption_entities: [] } as any;
+    expect(hasBotMention(captionMsg, "mybot")).toBe(true);
   });
 });
 
